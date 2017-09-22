@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#SBATCH --nodes=36
+#SBATCH --ntasks-per-node=16
+#SBATCH --cpus-per-task=4
+#SBATCH --constraint=cache,quad
+#SBATCH --partition=normal
+#SBATCH --output=qe-sirius-n576c4-%j.out
+
+export OMP_NUM_THREADS=4
+export MKL_NUM_THREADS=4
+export KMP_AFFINITY=scatter,granularity=fine,1
+
+cp ../pw.in .
+cp ../*.UPF .
+echo "srun -n 64 -c 1 --unbuffered --hint=nomultithread ../../../../q-e/PW/src/pw.x -i pw.in -ndiag 16 -npool 4" 
+srun -n 576 -c 4 --unbuffered --hint=nomultithread $SCRATCH/q-e/PW/src/pw.x -i pw.in -ndiag 576 -npool 1 -sirius
